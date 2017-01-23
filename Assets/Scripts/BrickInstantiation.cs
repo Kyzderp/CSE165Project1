@@ -9,7 +9,7 @@ public class BrickInstantiation : MonoBehaviour {
 
     int numberOfObjects = 32;
     float radius = 4f;
-    int cylinderHeight = 17;
+    int cylinderHeight = 10;
 
     float brickOffset = 0.75f; // pretty random value... trying to offset the next layer by half a brick
                                // but this is basically spinning the circle by this many radians
