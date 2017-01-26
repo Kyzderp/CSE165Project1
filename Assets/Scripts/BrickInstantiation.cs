@@ -11,7 +11,7 @@ public class BrickInstantiation : MonoBehaviour {
 
     int numberOfObjects = 32;
     float radius = 4f;
-    int cylinderHeight = 15;
+    int cylinderHeight = 17;
 
     float brickOffset = 0.75f; // pretty random value... trying to offset the next layer by half a brick
                                // but this is basically spinning the circle by this many radians
@@ -31,7 +31,7 @@ public class BrickInstantiation : MonoBehaviour {
                 Transform brick = Instantiate(brickPrefab, pos, Quaternion.identity);
 
                 brick.Rotate(new Vector3(0, -1 * Mathf.Rad2Deg * angle, 0));
-                brick.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", GetBrickColor());
+                brick.GetComponent<MeshRenderer>().material.SetColor("_Color", GetBrickColor());
 
                 bricks.Add(brick.gameObject);
             }
@@ -50,11 +50,11 @@ public class BrickInstantiation : MonoBehaviour {
         switch(Random.Range(1, 4))
         {
             case 1:
-                return new Color(0.5955882f, 0.1886035f, 0.09196584f);
+                return new Color(0.5955882f, 0.1886035f, 0.09196584f) + new Color(0.2f, 0.2f, 0.2f);
             case 2:
-                return new Color(0.6176471f, 0.3093938f, 0.1725779f);
+                return new Color(0.6176471f, 0.3093938f, 0.1725779f) + new Color(0.2f, 0.2f, 0.2f);
             case 3:
-                return new Color(0.625f, 0.4684497f, 0.3860294f);
+                return new Color(0.625f, 0.4684497f, 0.3860294f) + new Color(0.2f, 0.2f, 0.2f);
             default:
                 return new Color(0.5955882f, 0.1886035f, 0.09196584f);
         }

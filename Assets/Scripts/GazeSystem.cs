@@ -12,6 +12,7 @@ public class GazeSystem : MonoBehaviour {
     public const int NONE = 0;
     public const int LASER = 1;
     public const int CANNON = 2;
+    public const int RESET = 3;
 
     const float dwellTime = 1.0f;
     const float cannonInterval = 3.0f;
@@ -79,7 +80,7 @@ public class GazeSystem : MonoBehaviour {
                     mode = CANNON;
                 }
             }
-            else if (rayHit.transform.gameObject.tag == "reset" && mode != NONE)
+            else if (rayHit.transform.gameObject.tag == "reset" && mode != RESET)
             {
                 timer -= Time.deltaTime;
 
@@ -87,7 +88,7 @@ public class GazeSystem : MonoBehaviour {
                 {
                     Debug.Log("Reset");
                     weapon.GetComponent<TextMesh>().text = "";
-                    mode = NONE;
+                    mode = RESET;
 
                     BrickInstantiation BIscript = brickInstantiator.GetComponent<BrickInstantiation>();
                     List<GameObject> bricks = BIscript.bricks;
@@ -103,6 +104,18 @@ public class GazeSystem : MonoBehaviour {
 
                     BIscript.createCylinder();
 
+                }
+            }
+            else if (rayHit.transform.gameObject.tag == "off")
+            {
+                timer -= Time.deltaTime;
+
+                if (timer < 0f)
+                {
+                    Debug.Log("Weapon off");
+                    weapon.GetComponent<TextMesh>().text = "";
+
+                    mode = NONE;
                 }
             }
             else
