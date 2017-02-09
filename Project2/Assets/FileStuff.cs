@@ -14,24 +14,38 @@ public class FileStuff : MonoBehaviour {
 
     private StreamWriter file;
 
-	// Use this for initialization
-	void Start () {
-        file = new StreamWriter("data.txt");
+    string[] types = { "whiteboard", "locker", "desk", "chair", "cabinet", "3DTV" };
+
+    // Use this for initialization
+    void Start () {
+        
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            saveData();
+            Debug.Log("saved data");
+        }
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            loadData();
+            Debug.Log("loaded data");
+        }
 	}
 
     void saveData()
     {
-        string[] types = {"whiteboard", "locker", "desk", "chair", "cabinet", "3DTV"};
+        file = new StreamWriter("data.txt");
+        
         foreach (string type in types)
             saveType(type);
 
         file.Close();
     }
+
+    
 
     void saveType(string type)
     {
@@ -51,18 +65,29 @@ public class FileStuff : MonoBehaviour {
 
     void loadData()
     {
+        foreach (string type in types)
+            deleteType(type);
+
         string[] lines = File.ReadAllLines("data.txt");
         foreach (string line in lines)
         {
             string[] tokens = line.Split('$');
             spawnObject(tokens);
+        }
+    }
 
+    void deleteType(string type)
+    {
+        GameObject[] objs = GameObject.FindGameObjectsWithTag(type);
+        foreach (GameObject obj in objs)
+        {
+            DestroyObject(obj);
         }
     }
 
     void spawnObject(string[] tokens)
     {
-        Transform obj = Instantiate(chairPrefab);
+        Transform obj = null;
 
         Vector3 pos = new Vector3(float.Parse(tokens[2]), float.Parse(tokens[3]), float.Parse(tokens[4]));
         Quaternion quat = new Quaternion(float.Parse(tokens[5]), float.Parse(tokens[6]), float.Parse(tokens[7]), float.Parse(tokens[8]));
