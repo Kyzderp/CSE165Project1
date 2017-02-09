@@ -28,12 +28,18 @@ public class FileStuff : MonoBehaviour {
             saveData();
             Debug.Log("saved data");
         }
-        if (Input.GetKeyDown(KeyCode.L))
+        else if (Input.GetKeyDown(KeyCode.L))
         {
             loadData();
             Debug.Log("loaded data");
         }
-	}
+        else if (Input.GetKeyDown(KeyCode.D))
+        {
+            loadData("default.txt");
+            Debug.Log("loaded data");
+        }
+
+    }
 
     void saveData()
     {
@@ -63,12 +69,12 @@ public class FileStuff : MonoBehaviour {
         }
     }
 
-    void loadData()
+    void loadData(string filename = "data.txt")
     {
         foreach (string type in types)
             deleteType(type);
 
-        string[] lines = File.ReadAllLines("data.txt");
+        string[] lines = File.ReadAllLines(filename);
         foreach (string line in lines)
         {
             string[] tokens = line.Split('$');
