@@ -13,10 +13,12 @@ public class ControllerStuff : MonoBehaviour {
     GameObject myLine;
     GameObject lLine;
     bool selecting = false;
+    bool grabbing = false;
     List<GameObject> selection;
     float dist;
 
     List<GameObject> anchor;
+    Vector3 ankor;
 
     // note whiteboard not included
     string[] selectableTypes = { "locker", "desk", "chair", "cabinet", "3DTV", "whiteboard" };
@@ -95,8 +97,10 @@ public class ControllerStuff : MonoBehaviour {
             {
                 GameObject obj = rayHit.transform.gameObject;
                 dist = Vector3.Distance(r.transform.position, obj.transform.position);
+
                 if (System.Array.IndexOf(selectableTypes, obj.tag) >= 0)
                 {
+                    ankor = obj.transform.position - r.transform.position - (dist * r.transform.forward);
                     if (!selection.Contains(obj))
                     {
                         deselect();
@@ -123,14 +127,68 @@ public class ControllerStuff : MonoBehaviour {
                             anchor.Add(newobj);
                         }
                         selecting = true;
-                        Debug.Log("Grabbed item in group");
                     }
                 }
-            } 
-        } else if(OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+            }
+        }
+        else if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
         {
             deselect();
         }
+        else if (OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
+        {
+            Vector3 pos = r.transform.position - r.transform.forward * 0.3f;
+            Ray ray = new Ray(pos, r.transform.forward);
+            RaycastHit rayHit;
+
+            float grabRadius = 0.2f;
+
+            if (Physics.SphereCast(ray, grabRadius, out rayHit, 0.3f))
+            {
+                GameObject obj = rayHit.transform.gameObject;
+                dist = Vector3.Distance(r.transform.position, obj.transform.position);
+
+                if (System.Array.IndexOf(selectableTypes, obj.tag) >= 0)
+                {
+                    ankor = obj.transform.position - r.transform.position - (dist * r.transform.forward);
+                    grabbing = true;
+
+                    if (!selection.Contains(obj))
+                    {
+                        deselect();
+                        select(obj); // Normal single selection
+                    }
+                    else
+                    {
+                        // Selecting an object that's in a group
+                        // Put it on the front
+                        selection.Remove(obj);
+                        selection.Insert(0, obj);
+                        // Keep track of all current position and rotation
+
+                        anchor.Clear();
+
+                        foreach (GameObject elem in selection)
+                        {
+                            GameObject newobj = new GameObject();
+                            newobj.transform.position = new Vector3(elem.transform.position.x, elem.transform.position.y, elem.transform.position.z);
+                            newobj.transform.rotation = new Quaternion(elem.transform.rotation.x,
+                                elem.transform.rotation.y,
+                                elem.transform.rotation.z,
+                                elem.transform.rotation.w);
+                            anchor.Add(newobj);
+                        }
+                        selecting = true;
+                    }
+                }
+            }
+        }
+        else if (OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) < 0.3f && grabbing == true)
+        {
+            deselect();
+            grabbing = false;
+        }
+
     }
 
     void handleManipulation()
@@ -149,7 +207,7 @@ public class ControllerStuff : MonoBehaviour {
 
             // movement
             dist = (OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y * 0.1f) + dist;
-            selection[0].transform.position = r.transform.position + (dist * r.transform.forward);
+            selection[0].transform.position = r.transform.position + (dist * r.transform.forward) + ankor;
 
             doGroupManipulation();
         } 
@@ -196,7 +254,7 @@ public class ControllerStuff : MonoBehaviour {
         }
     }
 
-    void deselect()
+    public void deselect()
     {
         if (selection != null && selection.Count > 0)
         {
@@ -207,6 +265,7 @@ public class ControllerStuff : MonoBehaviour {
                     obj.GetComponent<Rigidbody>().useGravity = true;
                     obj.GetComponent<Rigidbody>().isKinematic = false;
                 }
+                obj.transform.GetChild(0).gameObject.SetActive(false);
             }
             selection.Clear();
         }
@@ -258,18 +317,17 @@ public class ControllerStuff : MonoBehaviour {
                     }
 
                     selection.Add(obj);
+                    obj.transform.GetChild(0).gameObject.SetActive(true);
                     if (obj.tag != "whiteboard")
                     {
                         obj.GetComponent<Rigidbody>().useGravity = false;
                         obj.GetComponent<Rigidbody>().isKinematic = true;
                     }
-                    Debug.Log("Added item. Count is now " + selection.Count);
                 }
             }
             else
             {
                 deselect();
-                Debug.Log("deselected group");
             }
         }
     }

@@ -84,6 +84,7 @@ public class FileStuff : MonoBehaviour {
 
     public void deleteAll()
     {
+        controllerstuff.deselect();
         foreach (string type in types)
             deleteType(type);
         controllerstuff.clearSelected();

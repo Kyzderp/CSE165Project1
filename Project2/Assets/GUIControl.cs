@@ -89,8 +89,8 @@ public class GUIControl : MonoBehaviour {
                 currentIndex = 0;
 
             if (currentIndex2 < 0 && screen == 1)
-                currentIndex2 = 3;
-            if (currentIndex2 > 3 && screen == 1)
+                currentIndex2 = 4;
+            if (currentIndex2 > 4 && screen == 1)
                 currentIndex2 = 0;
         }
 
@@ -107,8 +107,10 @@ public class GUIControl : MonoBehaviour {
                 filestuff.loadData();
             else if (currentIndex2 == 2)
                 filestuff.deleteAll();
-            else
+            else if (currentIndex2 == 3)
                 filestuff.loadData("default.txt");
+            else
+                filestuff.loadData("design.txt");
         }
 
         // update colors
