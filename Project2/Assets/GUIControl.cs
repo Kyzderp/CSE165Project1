@@ -132,6 +132,8 @@ public class GUIControl : MonoBehaviour {
         Vector3 pos = l.transform.position + l.transform.forward * 5.0f;
         if (pos.y < 2)
             pos.y = 2;
+        if (type == "3DTV" && pos.y < 3)
+            pos.y = 3;
 
         Transform obj = null;
 

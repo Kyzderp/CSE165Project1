@@ -11,48 +11,58 @@ public class ControllerStuff : MonoBehaviour {
     public GameObject character;
 
     GameObject myLine;
-    Vector3 rightOffset;
+    GameObject lLine;
     bool selecting = false;
-    GameObject singleSelected;
+    List<GameObject> selection;
     float dist;
-    
+
+    List<GameObject> anchor;
 
     // note whiteboard not included
     string[] selectableTypes = { "locker", "desk", "chair", "cabinet", "3DTV", "whiteboard" };
 
     // Use this for initialization
     void Start () {
+        selection = new List<GameObject>();
+        anchor = new List<GameObject>();
+
         myLine = new GameObject();
         myLine.name = "line";
         myLine.AddComponent<LineRenderer>();
         LineRenderer lr = myLine.GetComponent<LineRenderer>();
         lr.material = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
-
-        rightOffset = new Vector3(0, 0, 0);
-
         Color color = new Color(0f, 1f, 0f);
         lr.startColor = color;
         lr.endColor = color;
         lr.startWidth = 0.01f;
         lr.endWidth = 0.01f;
+
+        lLine = new GameObject();
+        lLine.name = "lline";
+        lLine.AddComponent<LineRenderer>();
+        LineRenderer llr = lLine.GetComponent<LineRenderer>();
+        llr.material = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
+        llr.startColor = color;
+        llr.endColor = color;
+        llr.startWidth = 0.01f;
+        llr.endWidth = 0.01f;
     }
 	
 	// Update is called once per frame
 	void Update () {
-        Vector3 rightPos = r.transform.position + rightOffset;
-        drawLine(rightPos, rightPos + r.transform.forward * 10f); // This is for drawing it ingame
-
-        Debug.DrawRay(r.transform.position, r.transform.forward);
+        drawLine(r.transform.position, r.transform.position + r.transform.forward * 10f, myLine); // This is for drawing it ingame
+        drawLine(l.transform.position, l.transform.position + l.transform.forward * 10f, lLine); // This is for drawing it ingame
 
         handleTeleport();
         handleSelection();
         handleManipulation();
+        handleGroupSelect();
 	}
 
-    void drawLine(Vector3 start, Vector3 end)
+    void drawLine(Vector3 start, Vector3 end, GameObject line)
     {
-        myLine.transform.position = start;
-        LineRenderer lr = myLine.GetComponent<LineRenderer>();
+        line.transform.position = start;
+        LineRenderer lr = line.GetComponent<LineRenderer>();
         lr.SetPosition(0, start);
         lr.SetPosition(1, end);
     }
@@ -87,7 +97,34 @@ public class ControllerStuff : MonoBehaviour {
                 dist = Vector3.Distance(r.transform.position, obj.transform.position);
                 if (System.Array.IndexOf(selectableTypes, obj.tag) >= 0)
                 {
-                    select(obj);
+                    if (!selection.Contains(obj))
+                    {
+                        deselect();
+                        select(obj); // Normal single selection
+                    }
+                    else
+                    {
+                        // Selecting an object that's in a group
+                        // Put it on the front
+                        selection.Remove(obj);
+                        selection.Insert(0, obj);
+                        // Keep track of all current position and rotation
+
+                        anchor.Clear();
+
+                        foreach (GameObject elem in selection)
+                        {
+                            GameObject newobj = new GameObject();
+                            newobj.transform.position = new Vector3(elem.transform.position.x, elem.transform.position.y, elem.transform.position.z);
+                            newobj.transform.rotation = new Quaternion(elem.transform.rotation.x,
+                                elem.transform.rotation.y,
+                                elem.transform.rotation.z,
+                                elem.transform.rotation.w);
+                            anchor.Add(newobj);
+                        }
+                        selecting = true;
+                        Debug.Log("Grabbed item in group");
+                    }
                 }
             } 
         } else if(OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
@@ -98,19 +135,25 @@ public class ControllerStuff : MonoBehaviour {
 
     void handleManipulation()
     {
-        if(singleSelected != null && singleSelected.tag != "whiteboard")
+        if (!selecting)
+            return;
+
+        if (selection.Count > 0 
+            && selection[0].tag != "whiteboard")
         {
             // rotations
             Vector3 yrot = Vector3.up * OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).x;
             Vector3 xrot = Vector3.left * OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y;
             //singleSelected.transform.Rotate(xrot, Space.World);
-            singleSelected.transform.Rotate(yrot, Space.World);
+            selection[0].transform.Rotate(yrot, Space.World);
 
             // movement
             dist = (OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y * 0.1f) + dist;
-            singleSelected.transform.position = r.transform.position + (dist * r.transform.forward);
+            selection[0].transform.position = r.transform.position + (dist * r.transform.forward);
+
+            doGroupManipulation();
         } 
-        else if(singleSelected != null && singleSelected.tag == "whiteboard")
+        else if(selection.Count > 0 && selection[0].tag == "whiteboard")
         {
             Ray ray = new Ray(r.transform.position, r.transform.forward);
 
@@ -123,24 +166,49 @@ public class ControllerStuff : MonoBehaviour {
                 {
                     Vector3 wallN = rayHit.normal;
                     Vector3 wallPos = rayHit.point;
-                    singleSelected.transform.position = wallPos;
-                    singleSelected.transform.forward = wallN;
-                    singleSelected.transform.Rotate(Vector3.right * -90);
+                    selection[0].transform.position = wallPos;
+                    selection[0].transform.forward = wallN;
+                    selection[0].transform.Rotate(Vector3.right * -90);
                 }
             }
+
+            doGroupManipulation();
+        }
+    }
+
+    void doGroupManipulation()
+    {
+        if (selection.Count <= 1)
+            return;
+
+        Vector3 posDiff = selection[0].transform.position - anchor[0].transform.position;
+        float angle = selection[0].transform.eulerAngles.y - anchor[0].transform.eulerAngles.y;
+
+        for (int i = 1; i < selection.Count; i++)
+        {
+            selection[i].transform.position = anchor[i].transform.position + posDiff;
+            GameObject fake = new GameObject();
+            fake.transform.rotation = anchor[i].transform.rotation;
+            fake.transform.position = selection[i].transform.position;
+            fake.transform.RotateAround(selection[0].transform.position, Vector3.up, angle);
+            selection[i].transform.rotation = fake.transform.rotation;
+            selection[i].transform.position = fake.transform.position;
         }
     }
 
     void deselect()
     {
-        if (singleSelected != null)
+        if (selection != null && selection.Count > 0)
         {
-            if(singleSelected.tag != "whiteboard")
+            foreach (GameObject obj in selection)
             {
-                singleSelected.GetComponent<Rigidbody>().useGravity = true;
-                singleSelected.GetComponent<Rigidbody>().isKinematic = false;
+                if (obj.tag != "whiteboard")
+                {
+                    obj.GetComponent<Rigidbody>().useGravity = true;
+                    obj.GetComponent<Rigidbody>().isKinematic = false;
+                }
             }
-            singleSelected = null;
+            selection.Clear();
         }
 
         selecting = false;
@@ -149,12 +217,60 @@ public class ControllerStuff : MonoBehaviour {
     void select(GameObject obj)
     {
         selecting = true;
-        singleSelected = obj;
+        selection.Clear();
+        selection.Add(obj);
 
-        if (singleSelected.tag != "whiteboard")
+        if (selection[0].tag != "whiteboard")
         {
-            singleSelected.GetComponent<Rigidbody>().useGravity = false;
-            singleSelected.GetComponent<Rigidbody>().isKinematic = true;
+            selection[0].GetComponent<Rigidbody>().useGravity = false;
+            selection[0].GetComponent<Rigidbody>().isKinematic = true;
+        }
+    }
+
+    public void clearSelected()
+    {
+        selection.Clear();
+    }
+
+    void handleGroupSelect()
+    {
+        if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger))
+        {
+            if (selecting)
+                deselect();
+            selecting = false;
+            Ray ray = new Ray(l.transform.position, l.transform.forward);
+            RaycastHit rayHit;
+
+            if (Physics.Raycast(ray, out rayHit, Mathf.Infinity))
+            {
+                GameObject obj = rayHit.transform.gameObject;
+                if (System.Array.IndexOf(selectableTypes, obj.tag) >= 0
+                    && !selection.Contains(obj))
+                {
+                    if (selection.Count > 0)
+                    {
+                        // Make sure whiteboards can't be grouped with others, deselect if so
+                        if (selection[0].tag == "whiteboard" && obj.tag != "whiteboard")
+                            deselect();
+                        else if (selection[0].tag != "whiteboard" && obj.tag == "whiteboard")
+                            deselect();
+                    }
+
+                    selection.Add(obj);
+                    if (obj.tag != "whiteboard")
+                    {
+                        obj.GetComponent<Rigidbody>().useGravity = false;
+                        obj.GetComponent<Rigidbody>().isKinematic = true;
+                    }
+                    Debug.Log("Added item. Count is now " + selection.Count);
+                }
+            }
+            else
+            {
+                deselect();
+                Debug.Log("deselected group");
+            }
         }
     }
 }

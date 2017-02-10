@@ -11,7 +11,7 @@ public class FileStuff : MonoBehaviour {
     public Transform chairPrefab;
     public Transform cabinetPrefab;
     public Transform treeDTVPrefab;
-
+    public ControllerStuff controllerstuff;
     private StreamWriter file;
 
     string[] types = { "whiteboard", "locker", "desk", "chair", "cabinet", "3DTV" };
@@ -86,6 +86,7 @@ public class FileStuff : MonoBehaviour {
     {
         foreach (string type in types)
             deleteType(type);
+        controllerstuff.clearSelected();
     }
 
     void deleteType(string type)
