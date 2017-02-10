@@ -18,7 +18,7 @@ public class ControllerStuff : MonoBehaviour {
     
 
     // note whiteboard not included
-    string[] selectableTypes = { "locker", "desk", "chair", "cabinet", "3DTV" };
+    string[] selectableTypes = { "locker", "desk", "chair", "cabinet", "3DTV", "whiteboard" };
 
     // Use this for initialization
     void Start () {
@@ -85,7 +85,6 @@ public class ControllerStuff : MonoBehaviour {
             {
                 GameObject obj = rayHit.transform.gameObject;
                 dist = Vector3.Distance(r.transform.position, obj.transform.position);
-
                 if (System.Array.IndexOf(selectableTypes, obj.tag) >= 0)
                 {
                     select(obj);
@@ -111,12 +110,14 @@ public class ControllerStuff : MonoBehaviour {
             dist = (OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y * 0.1f) + dist;
             singleSelected.transform.position = r.transform.position + (dist * r.transform.forward);
         } 
-        else if(singleSelected.tag == "whiteboard")
+        else if(singleSelected != null && singleSelected.tag == "whiteboard")
         {
             Ray ray = new Ray(r.transform.position, r.transform.forward);
-            RaycastHit rayHit;
 
-            if (Physics.Raycast(ray, out rayHit, Mathf.Infinity))
+            RaycastHit[] hits;
+            hits = Physics.RaycastAll(ray, Mathf.Infinity);
+
+            foreach(var rayHit in hits)
             {
                 if (rayHit.transform.gameObject.tag == "wall")
                 {
@@ -124,6 +125,7 @@ public class ControllerStuff : MonoBehaviour {
                     Vector3 wallPos = rayHit.point;
                     singleSelected.transform.position = wallPos;
                     singleSelected.transform.forward = wallN;
+                    singleSelected.transform.Rotate(Vector3.right * -90);
                 }
             }
         }
@@ -133,10 +135,14 @@ public class ControllerStuff : MonoBehaviour {
     {
         if (singleSelected != null)
         {
-            singleSelected.GetComponent<Rigidbody>().useGravity = true;
-            singleSelected.GetComponent<Rigidbody>().isKinematic = false;
+            if(singleSelected.tag != "whiteboard")
+            {
+                singleSelected.GetComponent<Rigidbody>().useGravity = true;
+                singleSelected.GetComponent<Rigidbody>().isKinematic = false;
+            }
             singleSelected = null;
         }
+
         selecting = false;
     }
 
@@ -144,7 +150,11 @@ public class ControllerStuff : MonoBehaviour {
     {
         selecting = true;
         singleSelected = obj;
-        singleSelected.GetComponent<Rigidbody>().useGravity = false;
-        singleSelected.GetComponent<Rigidbody>().isKinematic = true;
+
+        if (singleSelected.tag != "whiteboard")
+        {
+            singleSelected.GetComponent<Rigidbody>().useGravity = false;
+            singleSelected.GetComponent<Rigidbody>().isKinematic = true;
+        }
     }
 }
