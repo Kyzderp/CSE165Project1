@@ -41,7 +41,7 @@ public class FileStuff : MonoBehaviour {
 
     }
 
-    void saveData()
+    public void saveData()
     {
         file = new StreamWriter("data.txt");
         
@@ -69,7 +69,7 @@ public class FileStuff : MonoBehaviour {
         }
     }
 
-    void loadData(string filename = "data.txt")
+    public void loadData(string filename = "data.txt")
     {
         foreach (string type in types)
             deleteType(type);
@@ -80,6 +80,12 @@ public class FileStuff : MonoBehaviour {
             string[] tokens = line.Split('$');
             spawnObject(tokens);
         }
+    }
+
+    public void deleteAll()
+    {
+        foreach (string type in types)
+            deleteType(type);
     }
 
     void deleteType(string type)

@@ -15,17 +15,26 @@ public class GUIControl : MonoBehaviour {
 
     public GameObject l;
 
+    public FileStuff filestuff;
+
     string[] types = { "whiteboard", "locker", "desk", "chair", "cabinet", "3DTV" };
     int currentIndex;
     int previousIndex;
+    int currentIndex2;
+    int previousIndex2;
     int scrollCooldown;
+
+    int screen;
 
     // Use this for initialization
     void Start ()
     {
         currentIndex = 0;
         previousIndex = 0;
+        currentIndex2 = 0;
+        previousIndex2 = 0;
         scrollCooldown = 0;
+        screen = 0;
         setSelected(0);
 	}
 
@@ -38,37 +47,84 @@ public class GUIControl : MonoBehaviour {
         // scrolling on the menu
         if (scrollCooldown == 0)
         {
-            if (OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).y > 0.1)
+            if (OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).x > 0.3)
             {
-                currentIndex--;
+                if (screen == 0)
+                {
+                    screen = 1;
+                    canvas.GetChild(0).gameObject.SetActive(false);
+                    canvas.GetChild(1).gameObject.SetActive(true);
+                    setSelected(currentIndex2);
+                }
+            }
+            else if (OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).x < -0.3)
+            {
+                if (screen == 1)
+                {
+                    screen = 0;
+                    canvas.GetChild(1).gameObject.SetActive(false);
+                    canvas.GetChild(0).gameObject.SetActive(true);
+                }
+            }
+            else if (OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).y > 0.3)
+            {
+                if (screen == 0)
+                    currentIndex--;
+                else
+                    currentIndex2--;
                 scrollCooldown = 20; 
             }
-            else if (OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).y < -0.1)
+            else if (OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).y < -0.3)
             {
-                currentIndex++;
+                if (screen == 0)
+                    currentIndex++;
+                else
+                    currentIndex2++;
                 scrollCooldown = 20;
             }
 
-            if (currentIndex < 0)
+            if (currentIndex < 0 && screen == 0)
                 currentIndex = 5;
-            if (currentIndex > 5)
+            if (currentIndex > 5 && screen == 0)
                 currentIndex = 0;
+
+            if (currentIndex2 < 0 && screen == 1)
+                currentIndex2 = 3;
+            if (currentIndex2 > 3 && screen == 1)
+                currentIndex2 = 0;
         }
 
 
-        if (OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick))
+        if (OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick) && screen == 0)
         {
             spawnObject(types[currentIndex]);
         }
+        else if (OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick) && screen == 1)
+        {
+            if (currentIndex2 == 0)
+                filestuff.saveData();
+            else if (currentIndex2 == 1)
+                filestuff.loadData();
+            else if (currentIndex2 == 2)
+                filestuff.deleteAll();
+            else
+                filestuff.loadData("default.txt");
+        }
 
         // update colors
-        if (currentIndex != previousIndex)
+        if (currentIndex != previousIndex && screen == 0)
         {
             setUnselected(previousIndex);
             setSelected(currentIndex);
         }
+        else if (currentIndex2 != previousIndex2 && screen == 1)
+        {
+            setUnselected(previousIndex2);
+            setSelected(currentIndex2);
+        }
 
         previousIndex = currentIndex;
+        previousIndex2 = currentIndex2;
     }
 
     void spawnObject(string type)
@@ -95,11 +151,11 @@ public class GUIControl : MonoBehaviour {
 
     void setUnselected(int index)
     {
-        canvas.GetChild(0).GetChild(index).GetComponent<UnityEngine.UI.Image>().color = new Color(1f, 1f, 1f);
+        canvas.GetChild(screen).GetChild(index).GetComponent<UnityEngine.UI.Image>().color = new Color(1f, 1f, 1f);
     }
 
     void setSelected(int index)
     {
-        canvas.GetChild(0).GetChild(index).GetComponent<UnityEngine.UI.Image>().color = new Color(0.9f, 1f, 0.9f);
+        canvas.GetChild(screen).GetChild(index).GetComponent<UnityEngine.UI.Image>().color = new Color(0.9f, 1f, 0.9f);
     }
 }
