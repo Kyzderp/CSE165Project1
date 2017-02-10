@@ -110,6 +110,22 @@ public class ControllerStuff : MonoBehaviour {
             // movement
             dist = (OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y * 0.1f) + dist;
             singleSelected.transform.position = r.transform.position + (dist * r.transform.forward);
+        } 
+        else if(singleSelected.tag == "whiteboard")
+        {
+            Ray ray = new Ray(r.transform.position, r.transform.forward);
+            RaycastHit rayHit;
+
+            if (Physics.Raycast(ray, out rayHit, Mathf.Infinity))
+            {
+                if (rayHit.transform.gameObject.tag == "wall")
+                {
+                    Vector3 wallN = rayHit.normal;
+                    Vector3 wallPos = rayHit.point;
+                    singleSelected.transform.position = wallPos;
+                    singleSelected.transform.forward = wallN;
+                }
+            }
         }
     }
 
