@@ -9,10 +9,16 @@ public class ControllerStuff : MonoBehaviour {
     public GameObject l;
     public GameObject r;
     public GameObject character;
+
     GameObject myLine;
     Vector3 rightOffset;
+    bool selecting = false;
+    GameObject singleSelected;
+    float dist;
+    
 
-    string[] selectableTypes = { "locker", "desk", "whiteboard", "chair", "cabinet", "3DTV" };
+    // note whiteboard not included
+    string[] selectableTypes = { "locker", "desk", "chair", "cabinet", "3DTV" };
 
     // Use this for initialization
     void Start () {
@@ -40,6 +46,7 @@ public class ControllerStuff : MonoBehaviour {
 
         handleTeleport();
         handleSelection();
+        handleManipulation();
 	}
 
     void drawLine(Vector3 start, Vector3 end)
@@ -69,21 +76,59 @@ public class ControllerStuff : MonoBehaviour {
 
     void handleSelection()
     {
-        //Debug.Log(OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger));
-        if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.9f)
+        if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) && !selecting)
         {
             Ray ray = new Ray(r.transform.position, r.transform.forward);
             RaycastHit rayHit;
-            //Debug.Log("casting ray..");
 
             if (Physics.Raycast(ray, out rayHit, Mathf.Infinity))
             {
-                //Debug.Log(rayHit.transform.gameObject.tag);
-                if (System.Array.IndexOf(selectableTypes, rayHit.transform.gameObject.tag) >= 0)
+                GameObject obj = rayHit.transform.gameObject;
+                dist = Vector3.Distance(r.transform.position, obj.transform.position);
+
+                if (System.Array.IndexOf(selectableTypes, obj.tag) >= 0)
                 {
-                    Debug.Log("u hit a selektabl objek!!1");
+                    select(obj);
                 }
-            }
+            } 
+        } else if(OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+        {
+            deselect();
         }
+    }
+
+    void handleManipulation()
+    {
+        if(singleSelected != null && singleSelected.tag != "whiteboard")
+        {
+            // rotations
+            Vector3 yrot = Vector3.up * OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).x;
+            Vector3 xrot = Vector3.left * OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y;
+            //singleSelected.transform.Rotate(xrot, Space.World);
+            singleSelected.transform.Rotate(yrot, Space.World);
+
+            // movement
+            dist = (OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).y * 0.1f) + dist;
+            singleSelected.transform.position = r.transform.position + (dist * r.transform.forward);
+        }
+    }
+
+    void deselect()
+    {
+        if (singleSelected != null)
+        {
+            singleSelected.GetComponent<Rigidbody>().useGravity = true;
+            singleSelected.GetComponent<Rigidbody>().isKinematic = false;
+            singleSelected = null;
+        }
+        selecting = false;
+    }
+
+    void select(GameObject obj)
+    {
+        selecting = true;
+        singleSelected = obj;
+        singleSelected.GetComponent<Rigidbody>().useGravity = false;
+        singleSelected.GetComponent<Rigidbody>().isKinematic = true;
     }
 }
