@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class CollisionHandler : MonoBehaviour {
 
+    public bool collected = false;
+    public bool isNext = false;
+
 	// Use this for initialization
 	void Start () {
 		
@@ -13,4 +16,15 @@ public class CollisionHandler : MonoBehaviour {
 	void Update () {
 		
 	}
+
+    void OnTriggerEnter(Collider other)
+    {
+        if(other.tag == "player")
+        {
+            if(isNext)
+            {
+                Debug.Log("collected!");
+            }
+        }
+    }
 }

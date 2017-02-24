@@ -8,17 +8,34 @@ public class PointLoader : MonoBehaviour
 	public Transform pointPrefab;
     List<Transform> points; // list of points
     int next = 0; // next point you need to collect
+    int numPoints;
+    bool inGame = false; // True if the game is ongoing, false otherwise
 
 	// Use this for initialization
 	void Start () {
         points = new List<Transform>();
 
 		loadData("sample.txt");
+
+        inGame = true;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
+        while(inGame)
+        {
+            if (points[next].GetComponent<CollisionHandler>().collected == false)
+            {
+                // player has not collected next point
+                continue; // keep waiting for collision
+            } else
+            {
+                // else player collected the next point
+                next++;
+
+                setNext(points[next]);
+            }
+        }
 	}
 
 	public void loadData(string filename = "sample.txt")
@@ -37,5 +54,14 @@ public class PointLoader : MonoBehaviour
 
             points.Add(point);
         }
+
+        numPoints = points.Count;
+        setNext(points[0]);
+    }
+
+    void setNext(Transform point)
+    {
+        point.GetComponent<CollisionHandler>().isNext = true;
+        point.GetComponent<MeshRenderer>().material.SetColor("_Color", Color.red);
     }
 }

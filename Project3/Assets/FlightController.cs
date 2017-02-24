@@ -13,13 +13,13 @@ public class FlightController : MonoBehaviour
     public Transform lPalm;
     public Transform rPalm;
 
-    public Transform main;
     public Transform ship;
     public Transform cam;
 
     LeapProvider provider;
 
-    float speed = 0.5f;
+    bool thirdPerson = true;
+    float speed = 0.25f;
 
     // Use this for initialization
     void Start()
@@ -32,17 +32,26 @@ public class FlightController : MonoBehaviour
     void Update()
     {
         Frame frame = provider.CurrentFrame;
+        Hand Lhand, Rhand;
 
         if (left.gameObject.activeSelf && right.gameObject.activeSelf)
         {
-            Hand Lhand = frame.Hands[0];
-            Hand Rhand = frame.Hands[1];
-
-            //Debug.Log("body y:" + gameObject.transform.position.y + " Lhand y: " + left.position.y);
-            //Debug.Log("body y:" + gameObject.transform.position.y + " Lpalm y: " + lPalm.position.y);
+            if (frame.Hands[0].IsLeft)
+            {
+                Lhand = frame.Hands[0];
+                Rhand = frame.Hands[1];
+            } else
+            {
+                Lhand = frame.Hands[1];
+                Rhand = frame.Hands[0];
+            }
 
             float hand_diff_y = Lhand.PalmPosition.ToVector3().y - Rhand.PalmPosition.ToVector3().y;
-            hand_diff_y *= -275.0f; // this gives a range of about 5.0 (left higher) to -5.0 (right higher)
+            hand_diff_y *= -350.0f; // this gives a range of about 5.0 (left higher) to -5.0 (right higher)
+            //Debug.Log("lPalm.y: " + lPalm.localPosition.y + " rPalm.y: " + rPalm.localPosition.y);
+
+            //float hand_diff_y = lPalm.localPosition.y - (rPalm.localPosition.y - 0.024f);
+            //hand_diff_y *= -1000.0f;
             //Debug.Log(hand_diff_y);
 
             float hand_avg_height = (lPalm.position.y + rPalm.position.y) / 2.0f;
@@ -57,14 +66,27 @@ public class FlightController : MonoBehaviour
             ship.Rotate(Vector3.forward * Time.deltaTime * hand_diff_y); // roll
           
             ship.Rotate(Vector3.right * Time.deltaTime * relative_height); // tilt
-            //cam.Rotate(Vector3.right * Time.deltaTime * relative_height);
         }
 
 
         ship.transform.position += ship.transform.forward * speed;
         cam.forward = ship.forward;
-        Vector3 camPos = ship.position - ship.forward * 50.0f;
-        camPos.y += 15.0f;
+
+        Vector3 camPos;
+        if (thirdPerson)
+        {
+            camPos = ship.position - ship.forward * 0.75f;
+            camPos.y += 0.25f;
+        } else
+        {
+            Quaternion cam_rotation = Quaternion.LookRotation(ship.forward, ship.up);
+            cam.rotation = cam_rotation;
+
+            camPos = ship.position - ship.forward * 5.0f;
+            //camPos = ship.position - new Vector3(ship.forward.x, ship.forward.y - 1.0f, ship.forward.z) * 5.0f;
+            //camPos.y += 5.0f;
+        }
+
         cam.position = camPos;
 
     }
