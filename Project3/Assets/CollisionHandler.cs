@@ -7,6 +7,9 @@ public class CollisionHandler : MonoBehaviour {
     public bool collected = false;
     public bool isNext = false;
 
+    public Vector3 collidePos;
+    public Quaternion collideRot;
+
 	// Use this for initialization
 	void Start () {
 		
@@ -23,7 +26,10 @@ public class CollisionHandler : MonoBehaviour {
         {
             if(isNext)
             {
-                Debug.Log("collected!");
+                collected = true;
+
+                collideRot = other.transform.rotation;
+                collidePos = other.transform.position;
             }
         }
     }

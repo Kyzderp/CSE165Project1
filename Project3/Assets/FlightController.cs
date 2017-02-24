@@ -18,8 +18,10 @@ public class FlightController : MonoBehaviour
 
     LeapProvider provider;
 
+    public PointLoader pointLoader;
+
     bool thirdPerson = true;
-    float speed = 0.25f;
+    float speed = 0.35f;
 
     // Use this for initialization
     void Start()
@@ -31,6 +33,30 @@ public class FlightController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Vector3 camPos;
+        if (!pointLoader.inGame)
+        {
+            cam.forward = ship.forward;
+
+            if (thirdPerson)
+            {
+                camPos = ship.position - ship.forward * 0.75f;
+                camPos.y += 0.25f;
+            }
+            else
+            {
+                Quaternion cam_rotation = Quaternion.LookRotation(ship.forward, ship.up);
+                cam.rotation = cam_rotation;
+
+                camPos = ship.position;// - ship.forward * 0.005f;
+                                       //camPos = ship.position - new Vector3(ship.forward.x, ship.forward.y - 1.0f, ship.forward.z) * 5.0f;
+                                       //camPos.y += 5.0f;
+            }
+
+            cam.position = camPos;
+            return;
+        }
+
         Frame frame = provider.CurrentFrame;
         Hand Lhand, Rhand;
 
@@ -50,12 +76,12 @@ public class FlightController : MonoBehaviour
             hand_diff_y *= -350.0f; // this gives a range of about 5.0 (left higher) to -5.0 (right higher)
             //Debug.Log("lPalm.y: " + lPalm.localPosition.y + " rPalm.y: " + rPalm.localPosition.y);
 
-            //float hand_diff_y = lPalm.localPosition.y - (rPalm.localPosition.y - 0.024f);
-            //hand_diff_y *= -1000.0f;
+            //float hand_diff_y = lPalm.localPosition.y - (rPalm.localPosition.y);
+            //hand_diff_y *= 1000.0f;
             //Debug.Log(hand_diff_y);
 
             float hand_avg_height = (lPalm.position.y + rPalm.position.y) / 2.0f;
-            float relative_height = gameObject.transform.position.y - hand_avg_height -0.2f;
+            float relative_height = gameObject.transform.position.y - hand_avg_height -0.27f;
             relative_height = (relative_height * -200.0f) - 1.0f; // subtracting -1 to make the range more balanced
             //Debug.Log(relative_height); // range about -3.0 (highest) to 3.0 (lowest)
             // the relative_height range is how high/low your hands are relative to your body. Beware that moving
@@ -72,7 +98,6 @@ public class FlightController : MonoBehaviour
         ship.transform.position += ship.transform.forward * speed;
         cam.forward = ship.forward;
 
-        Vector3 camPos;
         if (thirdPerson)
         {
             camPos = ship.position - ship.forward * 0.75f;
@@ -82,7 +107,7 @@ public class FlightController : MonoBehaviour
             Quaternion cam_rotation = Quaternion.LookRotation(ship.forward, ship.up);
             cam.rotation = cam_rotation;
 
-            camPos = ship.position - ship.forward * 5.0f;
+            camPos = ship.position;// - ship.forward * 0.005f;
             //camPos = ship.position - new Vector3(ship.forward.x, ship.forward.y - 1.0f, ship.forward.z) * 5.0f;
             //camPos.y += 5.0f;
         }
@@ -90,4 +115,6 @@ public class FlightController : MonoBehaviour
         cam.position = camPos;
 
     }
+
+    
 }
