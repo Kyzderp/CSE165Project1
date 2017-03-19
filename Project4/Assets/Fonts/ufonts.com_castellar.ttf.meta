@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: eeb8096b3ead72140a405571b0bf86a2
+timeCreated: 1489794326
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Castellar
+  fontNames:
+  - Castellar
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
