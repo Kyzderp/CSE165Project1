@@ -61,10 +61,27 @@ public class GameFlow : MonoBehaviour
      * */
     private void pregameLoop()
     {
-        if (elapsedTime > 120) // Let's say 2 minutes for now?
+        if (elapsedTime > 5) // Let's say 2 minutes for now?
         {
             stage = Stages.Transition;
             elapsedTime = 0;
+
+
+            GameObject[] lights = GameObject.FindGameObjectsWithTag("light");
+            foreach (GameObject obj in lights)
+            {
+                /*Light light = obj.GetComponent<Light>();
+                if (Random.value > 0.98f)
+                {
+                    // toggle light with 0.1 chance?
+                    light.enabled = !light.enabled;
+                }*/
+                if (obj.GetComponents<LightFlicker>().Length > 0)
+                    obj.GetComponent<LightFlicker>().doFlicker = true;
+            }
+
+            Debug.Log("Go into transition phase");
+
             this.transitionLoop();
             return;
         }
@@ -77,16 +94,8 @@ public class GameFlow : MonoBehaviour
      * */
     private void transitionLoop()
     {
-        GameObject[] lights = GameObject.FindGameObjectsWithTag("light");
-        foreach (GameObject obj in lights)
-        {
-            Light light = obj.GetComponent<Light>();
-            if (Random.value > 0.9f)
-            {
-                // toggle light with 0.1 chance?
-                light.enabled = !light.enabled;
-            }
-        }
+        
+      
 
         // 10 seconds of light flashing seems fine
         if (elapsedTime > 10)
@@ -94,7 +103,24 @@ public class GameFlow : MonoBehaviour
             stage = Stages.Game;
             elapsedTime = 0;
 
+            // Stop the flicker
+            GameObject[] lights = GameObject.FindGameObjectsWithTag("light");
+            foreach (GameObject obj in lights)
+            {
+                /*Light light = obj.GetComponent<Light>();
+                if (Random.value > 0.98f)
+                {
+                    // toggle light with 0.1 chance?
+                    light.enabled = !light.enabled;
+                }*/
+                if (obj.GetComponents<LightFlicker>().Length > 0)
+                    obj.GetComponent<LightFlicker>().doFlicker = false;
+                obj.GetComponent<Light>().enabled = false;
+            }
+
             // TODO: spawn the weapons?
+
+            Debug.Log("Go into main loop");
 
             this.mainGameLoop();
             return;

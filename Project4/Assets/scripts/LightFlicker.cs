@@ -13,11 +13,12 @@ public class LightFlicker : MonoBehaviour {
     float minDownTime = 2.0f;
     float maxDownTime = 6.0f;
 
-    Light light;
+    private Light thisLight;
+    public bool doFlicker = false;
 
     // Use this for initialization
     void Start() {
-        light = GetComponent<Light>();
+        thisLight = GetComponent<Light>();
         StartCoroutine(flicker());
     }
 
@@ -32,17 +33,26 @@ public class LightFlicker : MonoBehaviour {
     {
         while (true)
         {
-            light.enabled = false;
-            yield return new WaitForSeconds(Random.Range(minDownTime, maxDownTime));
+            //Debug.Log(this.name + " doFlicker: " + doFlicker);
 
-            int flickerNum = Random.Range(minFlickerAgain, maxFlickerAgain);
+            if (!doFlicker)
+                yield return new WaitForSeconds(0.5f);
 
-            for(int i = 0; i < flickerNum; i++)
+            if (doFlicker)
             {
-                light.enabled = true;
-                yield return new WaitForSeconds(Random.Range(minFlickerSpeed, maxFlickerSpeed));
-                light.enabled = false;
-                yield return new WaitForSeconds(Random.Range(minFlickerSpeed, maxFlickerSpeed));
+                //thisLight.enabled = false;
+
+                yield return new WaitForSeconds(Random.Range(minDownTime, maxDownTime));
+
+                int flickerNum = Random.Range(minFlickerAgain, maxFlickerAgain);
+
+                for (int i = 0; i < flickerNum; i++)
+                {
+                    thisLight.enabled = true;
+                    yield return new WaitForSeconds(Random.Range(minFlickerSpeed, maxFlickerSpeed));
+                    thisLight.enabled = false;
+                    yield return new WaitForSeconds(Random.Range(minFlickerSpeed, maxFlickerSpeed));
+                }
             }
         }
     }
