@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class LightFlicker : MonoBehaviour {
-    float minFlickerSpeed = 0.001f;
-    float maxFlickerSpeed = 0.12f;
+    public float minFlickerSpeed = 0.001f;
+    public float maxFlickerSpeed = 0.12f;
 
-    int minFlickerAgain = 2;
-    int maxFlickerAgain = 9;
+    public int minFlickerAgain = 2;
+    public int maxFlickerAgain = 9;
 
 
-    float minDownTime = 2.0f;
-    float maxDownTime = 6.0f;
+    public float minDownTime = 2.0f;
+    public float maxDownTime = 6.0f;
 
     private Light thisLight;
     public bool doFlicker = false;
+    public bool alwaysFlicker = false;
+    bool keepFlickering = false;
 
     // Use this for initialization
     void Start() {
@@ -38,9 +40,10 @@ public class LightFlicker : MonoBehaviour {
             if (!doFlicker)
                 yield return new WaitForSeconds(0.5f);
 
-            if (doFlicker)
+            if (doFlicker || keepFlickering)
             {
-                //thisLight.enabled = false;
+                if (alwaysFlicker)
+                    keepFlickering = true;
 
                 yield return new WaitForSeconds(Random.Range(minDownTime, maxDownTime));
 

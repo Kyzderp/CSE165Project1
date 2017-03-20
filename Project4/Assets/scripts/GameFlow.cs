@@ -2,14 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class GameFlow : MonoBehaviour
 {
     public Transform goal;
     public Transform flashlight;
+    public GameObject textobj;
+    Text txt;
 
     enum Stages { Pregame, Transition, Game, GameOver };
-    private Stages stage = Stages.Transition; // Which section of game we're in.
+    private Stages stage = Stages.Pregame; // Which section of game we're in.
 
     private List<NavMeshAgent> enemies;
     private float elapsedTime = 0.0f;
@@ -19,6 +22,7 @@ public class GameFlow : MonoBehaviour
      * */
 	void Start ()
     {
+        txt = textobj.GetComponent<Text>();
         enemies = new List<NavMeshAgent>();
         GameObject[] objs = GameObject.FindGameObjectsWithTag("enemy");
         foreach (GameObject obj in objs)
@@ -65,7 +69,14 @@ public class GameFlow : MonoBehaviour
      * */
     private void pregameLoop()
     {
-        if (elapsedTime > 5) // Let's say 2 minutes for now?
+        if (elapsedTime < 7)
+        {
+            txt.text = "Explore the museum";
+        } else
+        {
+            txt.text = "";
+        }
+        if (elapsedTime > 10) // Let's say 2 minutes for now?
         {
             stage = Stages.Transition;
             elapsedTime = 0;
@@ -81,7 +92,9 @@ public class GameFlow : MonoBehaviour
                     light.enabled = !light.enabled;
                 }*/
                 if (obj.GetComponents<LightFlicker>().Length > 0)
+                {
                     obj.GetComponent<LightFlicker>().doFlicker = true;
+                }
             }
 
             Debug.Log("Go into transition phase");
