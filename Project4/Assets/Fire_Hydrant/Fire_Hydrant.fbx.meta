@@ -3,7 +3,15 @@ guid: 071efa14615269b4b999a68c2f7b64e6
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
+    100000: //RootNode
+    100002: FireHydrant
+    400000: //RootNode
+    400002: FireHydrant
+    2300000: FireHydrant
+    3300000: FireHydrant
     4300000: FireHydrant
+    7400000: Default Take
+    11100000: //RootNode
   materials:
     importMaterials: 1
     materialName: 3
