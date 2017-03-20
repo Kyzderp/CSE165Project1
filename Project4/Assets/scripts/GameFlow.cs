@@ -20,7 +20,11 @@ public class GameFlow : MonoBehaviour
 	void Start ()
     {
         enemies = new List<NavMeshAgent>();
-        // TODO: add all enemies. are we tagging them by the type? e.g. kyle, zombie, etc.? or all "enemy"?
+        GameObject[] objs = GameObject.FindGameObjectsWithTag("enemy");
+        foreach (GameObject obj in objs)
+        {
+            enemies.Add(obj.GetComponent<NavMeshAgent>());
+        }
         // TODO: spawn the flashlight somewhere random so it's at least more fun for us
 	}
 
@@ -135,7 +139,7 @@ public class GameFlow : MonoBehaviour
         // Make enemies follow player
         foreach (NavMeshAgent agent in enemies)
         {
-            if (this.canMove(agent))
+            if (agent.gameObject.GetComponent<EnemyStuff>().canMove())
             {
                 agent.destination = goal.position;
                 // TODO: and if we want, could do the animation at this time too
@@ -155,7 +159,7 @@ public class GameFlow : MonoBehaviour
     /**
      * Checks if a navigator is in spotlight and in player's view
      * */
-    private bool canMove(NavMeshAgent agent)
+    /*private bool canMove(NavMeshAgent agent)
     {
         // If light is on it
         // TODO: need better than just this single ray, maybe better way is an invisible
@@ -172,7 +176,7 @@ public class GameFlow : MonoBehaviour
             }
         }
         return true;
-    }
+    }*/
 
     /**
      * Loop for game over
