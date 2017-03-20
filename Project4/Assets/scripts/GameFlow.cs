@@ -9,7 +9,7 @@ public class GameFlow : MonoBehaviour
     public Transform flashlight;
 
     enum Stages { Pregame, Transition, Game, GameOver };
-    private Stages stage; // Which section of game we're in.
+    private Stages stage = Stages.Transition; // Which section of game we're in.
 
     private List<NavMeshAgent> enemies;
     private float elapsedTime = 0.0f;
@@ -102,7 +102,7 @@ public class GameFlow : MonoBehaviour
       
 
         // 10 seconds of light flashing seems fine
-        if (elapsedTime > 10)
+        if (elapsedTime > 3)
         {
             stage = Stages.Game;
             elapsedTime = 0;
@@ -142,6 +142,7 @@ public class GameFlow : MonoBehaviour
             if (agent.gameObject.GetComponent<EnemyStuff>().canMove())
             {
                 agent.destination = goal.position;
+                agent.Resume();
                 // TODO: and if we want, could do the animation at this time too
 
                 // Only if the monster can move should it be able to kill you
@@ -152,6 +153,10 @@ public class GameFlow : MonoBehaviour
                     this.gameoverLoop();
                     return;
                 }
+            }
+            else
+            {
+                agent.Stop();
             }
         }
     }
