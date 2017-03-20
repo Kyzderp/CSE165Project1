@@ -123,6 +123,11 @@ public class GameFlow : MonoBehaviour
             }
 
             // TODO: spawn the weapons?
+            GameObject[] weapons = GameObject.FindGameObjectsWithTag("gun");
+            foreach (GameObject obj in weapons)
+            {
+                obj.SetActive(true);
+            }
 
             Debug.Log("Go into main loop");
 
@@ -150,6 +155,10 @@ public class GameFlow : MonoBehaviour
                 {
                     stage = Stages.GameOver;
                     elapsedTime = 0;
+
+                    // TODO: Teleport them to the gameover box
+
+
                     this.gameoverLoop();
                     return;
                 }
@@ -160,28 +169,6 @@ public class GameFlow : MonoBehaviour
             }
         }
     }
-
-    /**
-     * Checks if a navigator is in spotlight and in player's view
-     * */
-    /*private bool canMove(NavMeshAgent agent)
-    {
-        // If light is on it
-        // TODO: need better than just this single ray, maybe better way is an invisible
-        // cone object that we check collisions with? + also a raycast in case of behind walls
-        Ray ray = new Ray(flashlight.position, flashlight.forward);
-        RaycastHit rayHit;
-        if (Physics.Raycast(ray, out rayHit, Mathf.Infinity))
-        {
-            // Check that it is within view
-            MeshRenderer rend = agent.gameObject.GetComponent<MeshRenderer>();
-            if (rend.isVisible)
-            {
-                return false;
-            }
-        }
-        return true;
-    }*/
 
     /**
      * Loop for game over
