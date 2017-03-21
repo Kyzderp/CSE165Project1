@@ -8,15 +8,30 @@ public class EnemyStuff : MonoBehaviour
     public GameObject meshRenderer;
     public Transform character;
 
+    private bool hasSeen = false;
+
 	// Use this for initialization
 	void Start () {
 		
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		
-	}
+	void Update ()
+    {
+        // Check if player is in line of sight to activate it
+        if (!this.hasSeen)
+        {
+            RaycastHit hit;
+            Vector3 dir = character.position - transform.position;
+            if (Physics.Raycast(transform.position + transform.forward * 1.5f, dir, out hit))
+            {
+                if (hit.collider.tag == "Player")
+                {
+                    this.hasSeen = true;
+                }
+            }
+        }
+    }
 
     /**
      * Checks if a navigator is in spotlight and in player's view

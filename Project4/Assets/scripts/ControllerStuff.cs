@@ -11,6 +11,8 @@ public class ControllerStuff : MonoBehaviour
     public GameObject l;
     public GameObject r;
     public GameObject character;
+    public GameObject flashlight; // this is the one in the right hand
+    public GameObject sparkplug; // this is the one in the left hand
 
     private GameObject myLine;
 
@@ -51,6 +53,7 @@ public class ControllerStuff : MonoBehaviour
 
     void handleSelection()
     {
+        // Right hand grabbing
         if (OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
         {
             Vector3 pos = r.transform.position - r.transform.forward * 0.3f;
@@ -62,7 +65,38 @@ public class ControllerStuff : MonoBehaviour
             if (Physics.SphereCast(ray, grabRadius, out rayHit, 0.3f))
             {
                 GameObject obj = rayHit.transform.gameObject;
+                this.grabObject(obj);
             }
+        }
+
+        // Left hand grabbing
+        if (OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger))
+        {
+            Vector3 pos = l.transform.position - l.transform.forward * 0.3f;
+            Ray ray = new Ray(pos, l.transform.forward);
+            RaycastHit rayHit;
+
+            float grabRadius = 0.2f;
+
+            if (Physics.SphereCast(ray, grabRadius, out rayHit, 0.3f))
+            {
+                GameObject obj = rayHit.transform.gameObject;
+                this.grabObject(obj);
+            }
+        }
+    }
+
+    void grabObject(GameObject obj)
+    {
+        if (obj.tag == "flashlight")
+        {
+            obj.SetActive(false);
+            flashlight.SetActive(true);
+        }
+        else if (obj.tag == "sparkplug")
+        {
+            obj.SetActive(false);
+            sparkplug.SetActive(true);
         }
     }
 
