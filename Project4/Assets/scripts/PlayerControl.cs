@@ -7,10 +7,11 @@ public class PlayerControl : MonoBehaviour {
     public Transform character;
 
     float MOVE_SPEED = 7.0f;
+    Quaternion upright;
 
 	// Use this for initialization
 	void Start () {
-		
+        upright = character.rotation;
 	}
 	
 	// Update is called once per frame
@@ -27,6 +28,8 @@ public class PlayerControl : MonoBehaviour {
             
         }
 
-        //transform.up = Vector3.up;
+        //character.rotation.SetEulerAngles(0, 3.14f, 0);
+        character.rotation = upright;
+        character.transform.position.Set(character.transform.position.x, 0.5f, character.transform.position.z);
     }
 }
