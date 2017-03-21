@@ -24,6 +24,9 @@ public class PlayerControl : MonoBehaviour {
         {
             Vector3 dir = new Vector3(transform.forward.x, 0, transform.forward.z);
             character.position += dir * Time.deltaTime * MOVE_SPEED;
+            
         }
+
+        //transform.up = Vector3.up;
     }
 }

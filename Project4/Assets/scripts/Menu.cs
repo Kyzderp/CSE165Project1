@@ -146,6 +146,13 @@ public class Menu : MonoBehaviour
                 if (obj.tag == "startButton")
                 {
                     player.position = new Vector3(194, 1, 329);
+                    gameFlow.enemySpeed = slider.value;
+                    if (difficultyMenu.transform.GetChild(0).gameObject.GetComponent<Text>().text == "Easy")
+                        gameFlow.difficulty = GameFlow.Difficulty.Easy;
+                    else if (difficultyMenu.transform.GetChild(0).gameObject.GetComponent<Text>().text == "Medium")
+                        gameFlow.difficulty = GameFlow.Difficulty.Medium;
+                    else if (difficultyMenu.transform.GetChild(0).gameObject.GetComponent<Text>().text == "Hard")
+                        gameFlow.difficulty = GameFlow.Difficulty.Hard;
                     gameFlow.stage = GameFlow.Stages.Pregame;
                 }
                 if (obj.tag == "sliderHandle")

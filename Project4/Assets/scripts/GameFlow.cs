@@ -97,7 +97,7 @@ public class GameFlow : MonoBehaviour
         {
             txt.text = "";
         }
-        if (elapsedTime > 30) // Let's say 2 minutes for now?
+        if (elapsedTime > 1200) // Let's say 2 minutes for now?
         {
             stage = Stages.Transition;
             elapsedTime = 0;

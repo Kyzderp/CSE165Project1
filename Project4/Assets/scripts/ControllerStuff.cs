@@ -13,6 +13,8 @@ public class ControllerStuff : MonoBehaviour
     public GameObject character;
     public GameObject flashlight; // this is the one in the right hand
     public GameObject sparkplug; // this is the one in the left hand
+    public GameObject gameLight;
+    public GameObject gameSpark;
 
     private GameObject myLine;
 
@@ -38,7 +40,6 @@ public class ControllerStuff : MonoBehaviour
             drawLine(r.transform.position, r.transform.position + r.transform.forward * 10f, myLine); // This is for drawing it ingame
 
         handleSelection();
-        handleManipulation();
     }
 
     void drawLine(Vector3 start, Vector3 end, GameObject line)
@@ -53,41 +54,28 @@ public class ControllerStuff : MonoBehaviour
 
     void handleSelection()
     {
+        float distanceThreshold = 0.5f;
         // Right hand grabbing
         if (OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
         {
-            Vector3 pos = r.transform.position - r.transform.forward * 0.3f;
-            Ray ray = new Ray(pos, r.transform.forward);
-            RaycastHit rayHit;
-
-            float grabRadius = 0.2f;
-
-            if (Physics.SphereCast(ray, grabRadius, out rayHit, 0.3f))
-            {
-                GameObject obj = rayHit.transform.gameObject;
-                this.grabObject(obj);
-            }
+            if (Vector3.Distance(r.transform.position, gameSpark.transform.position) < distanceThreshold)
+                this.grabObject(gameSpark);
+            if (Vector3.Distance(r.transform.position, gameLight.transform.position) < distanceThreshold)
+                this.grabObject(gameLight);
         }
-
         // Left hand grabbing
         if (OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger))
         {
-            Vector3 pos = l.transform.position - l.transform.forward * 0.3f;
-            Ray ray = new Ray(pos, l.transform.forward);
-            RaycastHit rayHit;
-
-            float grabRadius = 0.2f;
-
-            if (Physics.SphereCast(ray, grabRadius, out rayHit, 0.3f))
-            {
-                GameObject obj = rayHit.transform.gameObject;
-                this.grabObject(obj);
-            }
+            if (Vector3.Distance(l.transform.position, gameSpark.transform.position) < distanceThreshold)
+                this.grabObject(gameSpark);
+            if (Vector3.Distance(l.transform.position, gameLight.transform.position) < distanceThreshold)
+                this.grabObject(gameLight);
         }
     }
 
     void grabObject(GameObject obj)
     {
+        Debug.Log(obj.tag);
         if (obj.tag == "flashlight")
         {
             obj.SetActive(false);
@@ -100,7 +88,4 @@ public class ControllerStuff : MonoBehaviour
         }
     }
 
-    void handleManipulation()
-    {
-    }
 }
