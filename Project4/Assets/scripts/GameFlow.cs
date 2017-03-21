@@ -19,6 +19,11 @@ public class GameFlow : MonoBehaviour
     public enum Stages { Menu, Pregame, Transition, Game, GameOver };
     public Stages stage = Stages.Menu; // Which section of game we're in.
 
+    public enum Difficulty { Easy, Medium, Hard };
+    public Difficulty difficulty = Difficulty.Medium; // Determines the hints given
+
+    public float enemySpeed = 1.0f;
+
     private List<NavMeshAgent> enemies;
     private float elapsedTime = 0.0f;
     private bool enteringLoop = true;
@@ -34,6 +39,7 @@ public class GameFlow : MonoBehaviour
         foreach (GameObject obj in objs)
         {
             enemies.Add(obj.GetComponent<NavMeshAgent>());
+            obj.GetComponent<NavMeshAgent>().speed *= enemySpeed;
         }
         // TODO: spawn the flashlight somewhere random so it's at least more fun for us
 	}
