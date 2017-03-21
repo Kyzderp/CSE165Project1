@@ -19,6 +19,10 @@ public class Menu : MonoBehaviour
     public GameObject difficultyMenu;
     public Slider slider;
 
+    public AudioSource thunder;
+    public AudioSource click;
+
+
     enum Screen { Initial, Start, Options };
     private Screen screen = Screen.Initial;
 
@@ -32,6 +36,7 @@ public class Menu : MonoBehaviour
     void Start() {
         slider.minValue = 1;
         slider.maxValue = 2;
+        thunder.Play();
     }
 
     // Update is called once per frame
@@ -130,6 +135,7 @@ public class Menu : MonoBehaviour
                 GameObject obj = rayHit.transform.gameObject;
                 if (obj.tag == "difficultyDisplay")
                 {
+                    click.Play();
                     obj.SetActive(false);
                     difficultyMenu.transform.GetChild(1).gameObject.SetActive(true);
                     difficultyMenu.transform.GetChild(2).gameObject.SetActive(true);
@@ -137,6 +143,7 @@ public class Menu : MonoBehaviour
                 }
                 if (obj.tag == "difficultyChoice")
                 {
+                    click.Play();
                     difficultyMenu.transform.GetChild(0).gameObject.SetActive(true);
                     difficultyMenu.transform.GetChild(0).gameObject.GetComponent<Text>().text = obj.GetComponent<Text>().text;
                     difficultyMenu.transform.GetChild(1).gameObject.SetActive(false);
@@ -145,6 +152,7 @@ public class Menu : MonoBehaviour
                 }
                 if (obj.tag == "startButton")
                 {
+                    click.Play();
                     player.position = new Vector3(194, 1, 329);
                     gameFlow.enemySpeed = slider.value;
                     if (difficultyMenu.transform.GetChild(0).gameObject.GetComponent<Text>().text == "Easy")
@@ -153,10 +161,13 @@ public class Menu : MonoBehaviour
                         gameFlow.difficulty = GameFlow.Difficulty.Medium;
                     else if (difficultyMenu.transform.GetChild(0).gameObject.GetComponent<Text>().text == "Hard")
                         gameFlow.difficulty = GameFlow.Difficulty.Hard;
+
+                    thunder.Stop();
                     gameFlow.stage = GameFlow.Stages.Pregame;
                 }
                 if (obj.tag == "sliderHandle")
                 {
+                    click.Play();
                     // TODO: manipulation
                     initialHandle = rayHit.point;
                     sliding = true;
