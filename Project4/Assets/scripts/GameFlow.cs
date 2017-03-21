@@ -14,19 +14,21 @@ public class GameFlow : MonoBehaviour
     public AudioSource piano;
     public AudioSource sparks;
     public AudioSource museum;
+    public GameObject gameoverScreen;
 
-
-    public enum Stages { Menu, Pregame, Transition, Game, GameOver };
+    public enum Stages { Menu, Pregame, Transition, Game, GameOver, GameWin };
     public Stages stage = Stages.Menu; // Which section of game we're in.
 
     public enum Difficulty { Easy, Medium, Hard };
     public Difficulty difficulty = Difficulty.Medium; // Determines the hints given
 
+    public List<GameObject> sparkSearch;
+
     public float enemySpeed = 1.0f;
     public float textCooldown = 0.0f;
 
     private List<NavMeshAgent> enemies;
-    private float elapsedTime = 0.0f;
+    public float elapsedTime = 0.0f;
     private bool enteringLoop = true;
 
 	/**
@@ -42,7 +44,6 @@ public class GameFlow : MonoBehaviour
             enemies.Add(obj.GetComponent<NavMeshAgent>());
             obj.GetComponent<NavMeshAgent>().speed *= enemySpeed;
         }
-        // TODO: spawn the flashlight somewhere random so it's at least more fun for us
 	}
 
     /**
@@ -78,6 +79,11 @@ public class GameFlow : MonoBehaviour
         {
             gameoverLoop();
         }
+
+        if (stage == Stages.GameWin)
+        {
+            gameWinLoop();
+        }
     }
 
     /**
@@ -91,22 +97,28 @@ public class GameFlow : MonoBehaviour
             ambient.Play();
             museum.Play();
             enteringLoop = false;
-        }
 
-        // Display text at first
-        if (elapsedTime < 7)
-        {
+            // Display text at first
             if (difficulty == Difficulty.Easy)
-                txt.text = "Find the flashlight on a shelf";
+                this.setText("Find the flashlight on a shelf");
             else if (difficulty == Difficulty.Medium)
-                txt.text = "Explore the museum and find the flashlight";
+                this.setText("Explore the museum and find the flashlight");
             else if (difficulty == Difficulty.Hard)
-                txt.text = "Explore the museum";
+                this.setText("Explore the museum");
         }
-        else
-            txt.text = "";
 
-        if (elapsedTime > 120) // Let's say 2 minutes for now?
+        // Text display time
+        if (txt.text != "")
+        {
+            textCooldown += Time.deltaTime;
+            if (textCooldown > 7.0f)
+            {
+                textCooldown = 0;
+                txt.text = "";
+            }
+        }
+
+        if (elapsedTime > 180) // Let's say 2 minutes for now?
         {
             stage = Stages.Transition;
             elapsedTime = 0;
@@ -134,6 +146,16 @@ public class GameFlow : MonoBehaviour
      * */
     private void transitionLoop()
     {
+        // Text display time
+        if (txt.text != "")
+        {
+            textCooldown += Time.deltaTime;
+            if (textCooldown > 7.0f)
+            {
+                textCooldown = 0;
+                txt.text = "";
+            }
+        }
 
         // 10 seconds of light flashing seems fine
         if (elapsedTime > 10)
@@ -151,16 +173,12 @@ public class GameFlow : MonoBehaviour
             GameObject[] lights = GameObject.FindGameObjectsWithTag("light");
             foreach (GameObject obj in lights)
             {
-                /*Light light = obj.GetComponent<Light>();
-                if (Random.value > 0.98f)
-                {
-                    // toggle light with 0.1 chance?
-                    light.enabled = !light.enabled;
-                }*/
                 if (obj.GetComponents<LightFlicker>().Length > 0)
                     obj.GetComponent<LightFlicker>().doFlicker = false;
                 obj.GetComponent<Light>().enabled = false;
             }
+
+            setText("Uh oh, looks like the lights shorted. Find something to fix the lights.");
 
             Debug.Log("Go into main loop");
 
@@ -178,9 +196,12 @@ public class GameFlow : MonoBehaviour
         if (enteringLoop)
         {
             piano.Play();
-            GameObject[] objs = GameObject.FindGameObjectsWithTag("spark search");
-            foreach (GameObject search in objs)
+            //GameObject[] objs = GameObject.FindGameObjectsWithTag("sparkSearch");
+            foreach (GameObject search in sparkSearch)
+            {
+                Debug.Log("Activate " + search.tag + " " + search.name);
                 search.SetActive(true);
+            }
             enteringLoop = false;
         }
 
@@ -195,7 +216,7 @@ public class GameFlow : MonoBehaviour
             }
         }
 
-
+        
         // Make enemies follow player
         foreach (NavMeshAgent agent in enemies)
         {
@@ -203,7 +224,6 @@ public class GameFlow : MonoBehaviour
             {
                 agent.destination = goal.position;
                 agent.Resume();
-                // TODO: and if we want, could do the animation at this time too
 
                 // Only if the monster can move should it be able to kill you
                 if (Vector3.Distance(agent.transform.position, goal.position) < 2.0f) // TODO: not sure how much needed
@@ -211,7 +231,7 @@ public class GameFlow : MonoBehaviour
                     stage = Stages.GameOver;
                     elapsedTime = 0;
 
-                    // TODO: Teleport them to the gameover box
+                    gameoverScreen.SetActive(true);
 
                     enteringLoop = true;
                     this.gameoverLoop();
@@ -231,6 +251,26 @@ public class GameFlow : MonoBehaviour
     private void gameoverLoop()
     {
         // TODO: wat do
+    }
+
+    private void gameWinLoop()
+    {
+        GameObject[] lights = GameObject.FindGameObjectsWithTag("light");
+        foreach (GameObject obj in lights)
+        {
+            if (obj.GetComponents<LightFlicker>().Length > 0)
+            {
+                obj.GetComponent<LightFlicker>().doFlicker = false;
+                obj.GetComponent<LightFlicker>().alwaysFlicker = false;
+            }
+
+            obj.GetComponent<Light>().enabled = true;
+
+            setText("You win ayyyy lmao");
+        }
+
+        foreach (NavMeshAgent agent in enemies)
+            agent.Stop();
     }
 
     public void setText(string text)

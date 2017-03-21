@@ -21,8 +21,10 @@ public class TriggerEnter : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "player")
+        
+        if (other.tag == "Player")
         {
+            Debug.Log(other.tag);
             if (gameFlow.difficulty == GameFlow.Difficulty.Easy)
                 gameFlow.setText(easyHint);
             else if (gameFlow.difficulty == GameFlow.Difficulty.Medium)

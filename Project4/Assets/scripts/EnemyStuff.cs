@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class EnemyStuff : MonoBehaviour
 {
+    public GameFlow gameflow;
     public Transform flashlight;
     public GameObject meshRenderer;
     public Transform character;
@@ -19,14 +20,15 @@ public class EnemyStuff : MonoBehaviour
 	void Update ()
     {
         // Check if player is in line of sight to activate it
-        if (!this.hasSeen)
+        if (gameflow.stage == GameFlow.Stages.Game && !this.hasSeen)
         {
             RaycastHit hit;
-            Vector3 dir = character.position - transform.position;
+            Vector3 dir = character.position - (transform.position + transform.forward * 1.5f);
             if (Physics.Raycast(transform.position + transform.forward * 1.5f, dir, out hit))
             {
                 if (hit.collider.tag == "Player")
                 {
+                    Debug.Log(name + " saw the player");
                     this.hasSeen = true;
                 }
             }
@@ -38,14 +40,17 @@ public class EnemyStuff : MonoBehaviour
      * */
     public bool canMove()
     {
+        if (!this.hasSeen)
+            return false;
+
         // Check that it is within view
         if (meshRenderer != null && meshRenderer.GetComponent<SkinnedMeshRenderer>().isVisible)
         {
             RaycastHit hit;
-            Vector3 dir = character.position - transform.position;
-            if(Physics.Raycast(transform.position + transform.forward * 1.5f, dir, out hit))
+            Vector3 dir = character.position - (transform.position + transform.forward * 1.5f);
+            if (Physics.Raycast(transform.position + transform.forward * 1.5f, dir, out hit))
             {
-                if(hit.collider.tag == "Player")
+                if (hit.collider.tag == "Player")
                 {
                     return false;
                 }

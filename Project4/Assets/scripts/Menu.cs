@@ -108,6 +108,7 @@ public class Menu : MonoBehaviour
                     GameObject obj = rayHit.transform.gameObject;
                     if (obj.tag == "startButton")
                     {
+                        click.Play();
                         openingMenu.SetActive(false);
                         optionsMenu.SetActive(true);
                         screen = Screen.Options;

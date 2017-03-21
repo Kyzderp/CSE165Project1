@@ -15,6 +15,12 @@ public class ControllerStuff : MonoBehaviour
     public GameObject sparkplug; // this is the one in the left hand
     public GameObject gameLight;
     public GameObject gameSpark;
+    public GameObject box;
+    public GameObject boxPlug;
+    public GameObject breakerSearch;
+    public GameObject lightswitch;
+    public GameObject switchSearch;
+    public GameObject switchup;
 
     private GameObject myLine;
 
@@ -54,7 +60,7 @@ public class ControllerStuff : MonoBehaviour
 
     void handleSelection()
     {
-        float distanceThreshold = 0.5f;
+        float distanceThreshold = 1.0f;
         // Right hand grabbing
         if (OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
         {
@@ -70,6 +76,17 @@ public class ControllerStuff : MonoBehaviour
                 this.grabObject(gameSpark);
             if (Vector3.Distance(l.transform.position, gameLight.transform.position) < distanceThreshold)
                 this.grabObject(gameLight);
+
+            if (gameFlow.stage == GameFlow.Stages.Game && sparkplug.activeSelf)
+            {
+                if (Vector3.Distance(l.transform.position, box.transform.position) < distanceThreshold + 0.5f)
+                    this.grabObject(box);
+            }
+            if (gameFlow.stage == GameFlow.Stages.Game && boxPlug.activeSelf)
+            {
+                if (Vector3.Distance(l.transform.position, lightswitch.transform.position) < distanceThreshold + 0.5f)
+                    this.grabObject(lightswitch);
+            }
         }
     }
 
@@ -80,17 +97,35 @@ public class ControllerStuff : MonoBehaviour
         {
             obj.SetActive(false);
             flashlight.SetActive(true);
-            GameObject.FindGameObjectWithTag("flashlight search").SetActive(false);
+            //GameObject.FindGameObjectWithTag("flashlightSearch").SetActive(false);
+            if (gameFlow.stage == GameFlow.Stages.Pregame)
+                gameFlow.elapsedTime = 181;
         }
-        else if (obj.tag == "sparkplug")
+        else if (gameFlow.stage == GameFlow.Stages.Game && obj.tag == "sparkplug")
         {
             obj.SetActive(false);
             sparkplug.SetActive(true);
-            GameObject[] objs = GameObject.FindGameObjectsWithTag("spark search");
+            GameObject[] objs = GameObject.FindGameObjectsWithTag("sparkSearch");
             foreach (GameObject search in objs)
                 search.SetActive(false);
-            GameObject.FindGameObjectWithTag("breaker search").SetActive(true);
+            breakerSearch.SetActive(true);
+            gameFlow.setText("You found a spark plug. Take it to the breaker box.");
+        }
+        else if (obj.tag == "breakerbox")
+        {
+            boxPlug.SetActive(true);
+            sparkplug.SetActive(false);
+            gameFlow.setText("That's how it works... right? Now go flip the switch!");
+            breakerSearch.SetActive(false);
+            switchSearch.SetActive(true);
+        }
+        else if (obj.tag == "switch")
+        {
+            gameFlow.setText("Ding!");
+            switchSearch.SetActive(false);
+            lightswitch.SetActive(false);
+            switchup.SetActive(true);
+            gameFlow.stage = GameFlow.Stages.GameWin;
         }
     }
-
 }
