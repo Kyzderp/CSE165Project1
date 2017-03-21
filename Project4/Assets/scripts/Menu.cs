@@ -17,6 +17,7 @@ public class Menu : MonoBehaviour
     public GameObject openingMenu;
     public GameObject optionsMenu;
     public GameObject difficultyMenu;
+    public Slider slider;
 
     enum Screen { Initial, Start, Options };
     private Screen screen = Screen.Initial;
@@ -24,10 +25,13 @@ public class Menu : MonoBehaviour
     private float elapsedTime = 0.0f;
     private int flashCd = 0;
     private float textAlpha = 1000;
+    private Vector3 initialHandle;
+    private bool sliding = false;
 
     // Use this for initialization
     void Start() {
-
+        slider.minValue = 1;
+        slider.maxValue = 2;
     }
 
     // Update is called once per frame
@@ -139,16 +143,41 @@ public class Menu : MonoBehaviour
                     difficultyMenu.transform.GetChild(2).gameObject.SetActive(false);
                     difficultyMenu.transform.GetChild(3).gameObject.SetActive(false);
                 }
-                if (obj.tag == "sliderHandle")
-                {
-                    // TODO: manipulation
-                }
                 if (obj.tag == "startButton")
                 {
                     player.position = new Vector3(194, 1, 329);
                     gameFlow.stage = GameFlow.Stages.Pregame;
                 }
+                if (obj.tag == "sliderHandle")
+                {
+                    // TODO: manipulation
+                    initialHandle = rayHit.point;
+                    sliding = true;
+                    Debug.Log("Grab handle");
+                }
             }
         }
+
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.0f && sliding)
+        {
+            Ray ray = new Ray(r.transform.position, r.transform.forward);
+            RaycastHit rayHit;
+
+            if (Physics.Raycast(ray, out rayHit, Mathf.Infinity))
+            {
+                GameObject obj = rayHit.transform.gameObject;
+                if (obj.tag == "sliderHandle" || obj.tag == "sliderBackboard")
+                {
+                    // TODO: manipulation
+                    Vector3 difference = rayHit.point - initialHandle;
+                    initialHandle = rayHit.point;
+                    slider.value += -difference.z * 2.2f;
+                }
+            }
+        }
+        else
+            sliding = false;
+
+        slider.transform.GetChild(0).GetComponent<Text>().text = "" + slider.value;
     }
 }

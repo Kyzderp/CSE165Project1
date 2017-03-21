@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ControllerStuff : MonoBehaviour
 {
+    public GameFlow gameFlow;
 
     public OVRInput.Controller left;
     public OVRInput.Controller right;
@@ -31,7 +32,8 @@ public class ControllerStuff : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        drawLine(r.transform.position, r.transform.position + r.transform.forward * 10f, myLine); // This is for drawing it ingame
+        if (gameFlow.stage == GameFlow.Stages.Menu)
+            drawLine(r.transform.position, r.transform.position + r.transform.forward * 10f, myLine); // This is for drawing it ingame
 
         handleSelection();
         handleManipulation();

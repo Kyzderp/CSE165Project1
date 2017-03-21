@@ -6,7 +6,7 @@ public class PlayerControl : MonoBehaviour {
 
     public Transform character;
 
-    float MOVE_SPEED = 3.0f;
+    float MOVE_SPEED = 7.0f;
 
 	// Use this for initialization
 	void Start () {

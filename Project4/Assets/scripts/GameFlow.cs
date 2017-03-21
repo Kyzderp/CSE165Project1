@@ -10,12 +10,18 @@ public class GameFlow : MonoBehaviour
     public Transform flashlight;
     public GameObject textobj;
     Text txt;
+    public AudioSource ambient;
+    public AudioSource piano;
+    public AudioSource sparks;
+    public AudioSource museum;
+
 
     public enum Stages { Menu, Pregame, Transition, Game, GameOver };
     public Stages stage = Stages.Menu; // Which section of game we're in.
 
     private List<NavMeshAgent> enemies;
     private float elapsedTime = 0.0f;
+    private bool enteringLoop = true;
 
 	/**
      * Use this for initialization
@@ -72,6 +78,12 @@ public class GameFlow : MonoBehaviour
      * */
     private void pregameLoop()
     {
+        if (enteringLoop)
+        {
+            ambient.Play();
+            museum.Play();
+            enteringLoop = false;
+        }
         if (elapsedTime < 7)
         {
             txt.text = "Explore the museum";
@@ -79,7 +91,7 @@ public class GameFlow : MonoBehaviour
         {
             txt.text = "";
         }
-        if (elapsedTime > 10) // Let's say 2 minutes for now?
+        if (elapsedTime > 30) // Let's say 2 minutes for now?
         {
             stage = Stages.Transition;
             elapsedTime = 0;
@@ -102,6 +114,7 @@ public class GameFlow : MonoBehaviour
 
             Debug.Log("Go into transition phase");
 
+            enteringLoop = true;
             this.transitionLoop();
             return;
         }
@@ -114,12 +127,16 @@ public class GameFlow : MonoBehaviour
      * */
     private void transitionLoop()
     {
-        
-      
 
         // 10 seconds of light flashing seems fine
         if (elapsedTime > 3)
         {
+            if (enteringLoop)
+            {
+                sparks.Play();
+                enteringLoop = false;
+            }
+
             stage = Stages.Game;
             elapsedTime = 0;
 
@@ -147,6 +164,7 @@ public class GameFlow : MonoBehaviour
 
             Debug.Log("Go into main loop");
 
+            enteringLoop = true;
             this.mainGameLoop();
             return;
         }
@@ -157,6 +175,11 @@ public class GameFlow : MonoBehaviour
      * */
     private void mainGameLoop()
     {
+        if (enteringLoop)
+        {
+            piano.Play();
+            enteringLoop = false;
+        }
         // Make enemies follow player
         foreach (NavMeshAgent agent in enemies)
         {
@@ -174,7 +197,7 @@ public class GameFlow : MonoBehaviour
 
                     // TODO: Teleport them to the gameover box
 
-
+                    enteringLoop = true;
                     this.gameoverLoop();
                     return;
                 }
