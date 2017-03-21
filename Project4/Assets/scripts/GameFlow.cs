@@ -23,6 +23,7 @@ public class GameFlow : MonoBehaviour
     public Difficulty difficulty = Difficulty.Medium; // Determines the hints given
 
     public float enemySpeed = 1.0f;
+    public float textCooldown = 0.0f;
 
     private List<NavMeshAgent> enemies;
     private float elapsedTime = 0.0f;
@@ -84,20 +85,28 @@ public class GameFlow : MonoBehaviour
      * */
     private void pregameLoop()
     {
+        // First-time setup
         if (enteringLoop)
         {
             ambient.Play();
             museum.Play();
             enteringLoop = false;
         }
+
+        // Display text at first
         if (elapsedTime < 7)
         {
-            txt.text = "Explore the museum";
-        } else
-        {
-            txt.text = "";
+            if (difficulty == Difficulty.Easy)
+                txt.text = "Find the flashlight on a shelf";
+            else if (difficulty == Difficulty.Medium)
+                txt.text = "Explore the museum and find the flashlight";
+            else if (difficulty == Difficulty.Hard)
+                txt.text = "Explore the museum";
         }
-        if (elapsedTime > 1200) // Let's say 2 minutes for now?
+        else
+            txt.text = "";
+
+        if (elapsedTime > 120) // Let's say 2 minutes for now?
         {
             stage = Stages.Transition;
             elapsedTime = 0;
@@ -106,16 +115,8 @@ public class GameFlow : MonoBehaviour
             GameObject[] lights = GameObject.FindGameObjectsWithTag("light");
             foreach (GameObject obj in lights)
             {
-                /*Light light = obj.GetComponent<Light>();
-                if (Random.value > 0.98f)
-                {
-                    // toggle light with 0.1 chance?
-                    light.enabled = !light.enabled;
-                }*/
                 if (obj.GetComponents<LightFlicker>().Length > 0)
-                {
                     obj.GetComponent<LightFlicker>().doFlicker = true;
-                }
             }
 
             Debug.Log("Go into transition phase");
@@ -135,7 +136,7 @@ public class GameFlow : MonoBehaviour
     {
 
         // 10 seconds of light flashing seems fine
-        if (elapsedTime > 3)
+        if (elapsedTime > 10)
         {
             if (enteringLoop)
             {
@@ -161,13 +162,6 @@ public class GameFlow : MonoBehaviour
                 obj.GetComponent<Light>().enabled = false;
             }
 
-            // TODO: spawn the weapons?
-            GameObject[] weapons = GameObject.FindGameObjectsWithTag("gun");
-            foreach (GameObject obj in weapons)
-            {
-                obj.SetActive(true);
-            }
-
             Debug.Log("Go into main loop");
 
             enteringLoop = true;
@@ -184,8 +178,24 @@ public class GameFlow : MonoBehaviour
         if (enteringLoop)
         {
             piano.Play();
+            GameObject[] objs = GameObject.FindGameObjectsWithTag("spark search");
+            foreach (GameObject search in objs)
+                search.SetActive(true);
             enteringLoop = false;
         }
+
+        // Text display time
+        if (txt.text != "")
+        {
+            textCooldown += Time.deltaTime;
+            if (textCooldown > 7.0f)
+            {
+                textCooldown = 0;
+                txt.text = "";
+            }
+        }
+
+
         // Make enemies follow player
         foreach (NavMeshAgent agent in enemies)
         {
@@ -221,5 +231,11 @@ public class GameFlow : MonoBehaviour
     private void gameoverLoop()
     {
         // TODO: wat do
+    }
+
+    public void setText(string text)
+    {
+        txt.text = text;
+        textCooldown = 0;
     }
 }

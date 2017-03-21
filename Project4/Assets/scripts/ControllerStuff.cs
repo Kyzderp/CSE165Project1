@@ -80,11 +80,16 @@ public class ControllerStuff : MonoBehaviour
         {
             obj.SetActive(false);
             flashlight.SetActive(true);
+            GameObject.FindGameObjectWithTag("flashlight search").SetActive(false);
         }
         else if (obj.tag == "sparkplug")
         {
             obj.SetActive(false);
             sparkplug.SetActive(true);
+            GameObject[] objs = GameObject.FindGameObjectsWithTag("spark search");
+            foreach (GameObject search in objs)
+                search.SetActive(false);
+            GameObject.FindGameObjectWithTag("breaker search").SetActive(true);
         }
     }
 
