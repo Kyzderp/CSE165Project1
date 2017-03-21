@@ -11,8 +11,8 @@ public class GameFlow : MonoBehaviour
     public GameObject textobj;
     Text txt;
 
-    enum Stages { Menu, Pregame, Transition, Game, GameOver };
-    private Stages stage = Stages.Menu; // Which section of game we're in.
+    public enum Stages { Menu, Pregame, Transition, Game, GameOver };
+    public Stages stage = Stages.Menu; // Which section of game we're in.
 
     private List<NavMeshAgent> enemies;
     private float elapsedTime = 0.0f;
@@ -37,6 +37,9 @@ public class GameFlow : MonoBehaviour
      * */
     void Update()
     {
+        if (stage == Stages.Menu)
+            return;
+
         elapsedTime += Time.deltaTime;
 
         // Lights on
