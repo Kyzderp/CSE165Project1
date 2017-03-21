@@ -11,8 +11,8 @@ public class GameFlow : MonoBehaviour
     public GameObject textobj;
     Text txt;
 
-    enum Stages { Pregame, Transition, Game, GameOver };
-    private Stages stage = Stages.Pregame; // Which section of game we're in.
+    enum Stages { Menu, Pregame, Transition, Game, GameOver };
+    private Stages stage = Stages.Menu; // Which section of game we're in.
 
     private List<NavMeshAgent> enemies;
     private float elapsedTime = 0.0f;

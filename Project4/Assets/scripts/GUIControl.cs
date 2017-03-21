@@ -6,18 +6,8 @@ public class GUIControl : MonoBehaviour {
 
     public Transform canvas;
 
-    public Transform whiteboardPrefab;
-    public Transform lockerPrefab;
-    public Transform deskPrefab;
-    public Transform chairPrefab;
-    public Transform cabinetPrefab;
-    public Transform treeDTVPrefab;
-
     public GameObject l;
 
-    public FileStuff filestuff;
-
-    string[] types = { "whiteboard", "locker", "desk", "chair", "cabinet", "3DTV" };
     int currentIndex;
     int previousIndex;
     int currentIndex2;
@@ -97,20 +87,10 @@ public class GUIControl : MonoBehaviour {
 
         if (OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick) && screen == 0)
         {
-            spawnObject(types[currentIndex]);
+            //spawnObject(types[currentIndex]);
         }
         else if (OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick) && screen == 1)
         {
-            if (currentIndex2 == 0)
-                filestuff.saveData();
-            else if (currentIndex2 == 1)
-                filestuff.loadData();
-            else if (currentIndex2 == 2)
-                filestuff.deleteAll();
-            else if (currentIndex2 == 3)
-                filestuff.loadData("default.txt");
-            else
-                filestuff.loadData("design.txt");
         }
 
         // update colors
@@ -127,30 +107,6 @@ public class GUIControl : MonoBehaviour {
 
         previousIndex = currentIndex;
         previousIndex2 = currentIndex2;
-    }
-
-    void spawnObject(string type)
-    {
-        Vector3 pos = l.transform.position + l.transform.forward * 5.0f;
-        if (pos.y < 2)
-            pos.y = 2;
-        if (type == "3DTV" && pos.y < 3)
-            pos.y = 3;
-
-        Transform obj = null;
-
-        Quaternion quat = new Quaternion(-0.7071068f, 0, 0, 0.7071068f);
-
-        switch (type)
-        {
-            case "whiteboard": obj = Instantiate(whiteboardPrefab, pos, quat); break;
-            case "locker": obj = Instantiate(lockerPrefab, pos, quat); break;
-            case "desk": obj = Instantiate(deskPrefab, pos, quat); break;
-            case "chair": obj = Instantiate(chairPrefab, pos, quat); break;
-            case "cabinet": obj = Instantiate(cabinetPrefab, pos, quat); break;
-            case "3DTV": obj = Instantiate(treeDTVPrefab, pos, quat); break;
-            default: break;
-        }
     }
 
     void setUnselected(int index)
